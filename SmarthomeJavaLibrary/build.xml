@@ -1,0 +1,46 @@
+<project name="smarthome-library" default="compile">
+
+	<property name="jar.name" value="smarthomel-lib.jar" />
+	<property name="src.dir" location="src" />
+	<property name="lib.dir" location="libs" />
+	<property name="classes.dir" location="bin" />
+	<property name="jar.dir" location="jar" />
+
+	<path id="classpath">
+		<fileset dir="libs">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+	
+	<target name="compile" depends="clean">
+		<mkdir dir="${lib.dir}"/>
+
+		<javac 
+			encoding="iso-8859-1"
+			source="1.7" 
+			srcdir="${src.dir}"
+			debug="true"
+			includeantruntime="false"
+			destdir="${classes.dir}">
+			<classpath refid="classpath" />
+			<exclude name="**/test/**"/>
+		</javac>
+
+		<mkdir dir="${jar.dir}"/>
+		<jar jarfile="${jar.dir}/${jar.name}">
+			<fileset dir="${classes.dir}">
+			</fileset>
+			<manifest>
+				<attribute name="Main-class" value="${builder.packagename}.${builder.classname}"/>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="clean">
+		<delete includeemptydirs="true">
+			<fileset dir="${classes.dir}" />
+		</delete>
+		<mkdir dir="${classes.dir}"/>
+	</target>
+	
+</project>
