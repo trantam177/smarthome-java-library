@@ -1,2 +1,0 @@
-Dimmer: set
-Day: time
