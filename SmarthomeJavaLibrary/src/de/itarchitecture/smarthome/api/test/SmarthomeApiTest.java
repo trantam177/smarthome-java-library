@@ -34,8 +34,8 @@ import de.itarchitecture.smarthome.api.exceptions.SmartHomeSessionExpiredExcepti
  * @author michael, sammy98
  */
 public class SmarthomeApiTest {
-	String username = "sammy98";
-	String password = "ww8oi33";
+	String username = "username";
+	String password = "password";
 	String hostname = "192.168.1.124";
 	SmartHomeSession smarthomeSession = new SmartHomeSession();
 
