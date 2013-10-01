@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
@@ -20,6 +19,10 @@ import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+
+//import android.util.Base64;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -29,20 +32,19 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 import org.xml.sax.SAXException;
 
-//import android.util.Base64;
-import org.apache.commons.codec.binary.Base64;
-
-import org.apache.commons.io.IOUtils;
 import de.itarchitecture.smarthome.api.entities.SmartHomeLocation;
 import de.itarchitecture.smarthome.api.entities.TemperatureHumidityDevice;
+import de.itarchitecture.smarthome.api.entities.devices.DaySensor;
+import de.itarchitecture.smarthome.api.entities.devices.EMailActuator;
 import de.itarchitecture.smarthome.api.entities.devices.GenericActuator;
 import de.itarchitecture.smarthome.api.entities.devices.LogicalDevice;
 import de.itarchitecture.smarthome.api.entities.devices.PhysicalDevice;
+import de.itarchitecture.smarthome.api.entities.devices.PushButtonSensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomHumiditySensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureSensor;
+import de.itarchitecture.smarthome.api.entities.devices.SMSActuator;
+import de.itarchitecture.smarthome.api.entities.devices.SmokeDetectorSensor;
 import de.itarchitecture.smarthome.api.entities.devices.SwitchActuator;
-import de.itarchitecture.smarthome.api.entities.devices.WindowDoorSensor;
-import de.itarchitecture.smarthome.api.exceptions.SHFunctionalException;
 import de.itarchitecture.smarthome.api.exceptions.LoginFailedException;
 import de.itarchitecture.smarthome.api.exceptions.SHTechnicalException;
 import de.itarchitecture.smarthome.api.exceptions.SmartHomeSessionExpiredException;
@@ -80,9 +82,13 @@ public class SmartHomeSession implements Serializable {
 	}
 
 	private ConcurrentHashMap<String,? extends LogicalDevice> switchActuators = null;
-	private ConcurrentHashMap<String,? extends LogicalDevice> genericActuators = null;
+	private ConcurrentHashMap<String,? extends LogicalDevice> dimmerActuators = null;
+	private ConcurrentHashMap<String,? extends LogicalDevice> baseActuators = null;
+	private ConcurrentHashMap<String,? extends LogicalDevice> baseSensors = null;
 	private ConcurrentHashMap<String,? extends LogicalDevice> roomTemperatureActuators = null;
     HttpComponentsHelper httpHelper = new HttpComponentsHelper();
+	private ConcurrentHashMap<String, SmokeDetectorSensor> smokeDetectorSensors;
+	private ConcurrentHashMap<String, PushButtonSensor> pushButtonSensors;
 	private ConcurrentHashMap<String, RoomTemperatureSensor> roomTemperatureSensors;
 	private ConcurrentHashMap<String, RoomHumiditySensor> roomHumiditySensors;
 	private ConcurrentHashMap<String, TemperatureHumidityDevice> temperatureHumidityDevices;
@@ -151,19 +157,28 @@ public class SmartHomeSession implements Serializable {
 		Logger.getLogger(SmartHomeSession.class.getName()).log(Level.FINE,sResponse);
         LogicalDeviceXMLResponse logDevXmlRes = new LogicalDeviceXMLResponse();
         logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), switchActuators);
+        logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), smokeDetectorSensors);
+        logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), pushButtonSensors);
+        logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), dimmerActuators);
         logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), roomTemperatureActuators);
         logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), roomTemperatureSensors);
         logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), roomHumiditySensors);
         logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), windowDoorSensors);
-        logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), genericActuators);
+        logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), baseActuators);
+        logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), baseSensors);
     }
+    
     public void refreshConfigurationFromInputStream(InputStream is){
     SmartHomeEntitiesXMLResponse smartHomeEntitiesXMLRes = new SmartHomeEntitiesXMLResponse(is);
     this.switchActuators = smartHomeEntitiesXMLRes.getSwitchActuators();
+    this.dimmerActuators = smartHomeEntitiesXMLRes.getDimmerActuators();
     this.locations = smartHomeEntitiesXMLRes.getLocations();
-    this.genericActuators = smartHomeEntitiesXMLRes.getGenericActuators(); 
+    this.baseActuators = smartHomeEntitiesXMLRes.getBaseActuators(); 
+    this.baseSensors = smartHomeEntitiesXMLRes.getBaseSensors(); 
     this.roomTemperatureActuators = smartHomeEntitiesXMLRes.getRoomTemperatureActuators();
     this.roomTemperatureSensors  = smartHomeEntitiesXMLRes.getRoomTemperatureSensors();
+    this.smokeDetectorSensors = smartHomeEntitiesXMLRes.getSmokeDetectorSensors();
+    this.pushButtonSensors = smartHomeEntitiesXMLRes.getPushButtonSensors();
     this.roomHumiditySensors  = smartHomeEntitiesXMLRes.getRoomHumiditySensors();
     this.mapRoomsToHumiditySensors = smartHomeEntitiesXMLRes.getMapRoomsToHumiditySensors();
     this.mapRoomsToTemperatureActuator = smartHomeEntitiesXMLRes.getMapRoomsToTemperatureActuators();
@@ -173,12 +188,25 @@ public class SmartHomeSession implements Serializable {
     }
 
 	/**
+	 * @return the smokeDetectorSensors
+	 */
+	public ConcurrentHashMap<String, SmokeDetectorSensor> getSmokeDetectorSensors() {
+		return smokeDetectorSensors;
+	}
+
+	/**
+	 * @return the smokeDetectorSensors
+	 */
+	public ConcurrentHashMap<String, PushButtonSensor> getPushButtonSensors() {
+		return pushButtonSensors;
+	}
+	
+	/**
 	 * @return the temperatureHumidityDevices
 	 */
 	public ConcurrentHashMap<String, TemperatureHumidityDevice> getTemperatureHumidityDevices() {
 		return temperatureHumidityDevices;
 	}
-
 	/**
 	 * @return the mapRoomsToHumiditySensors
 	 */
@@ -220,8 +248,12 @@ public class SmartHomeSession implements Serializable {
         String sResponse = "";
         getConfigurationRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"GetEntitiesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\""+ sessionId + "\">\n" + "<EntityType>Configuration</EntityType></BaseRequest>";
         sResponse = executeRequest(getConfigurationRequest, "/cmd");
-//		Logger.getLogger(SmartHomeSession.class.getName()).log(Level.SEVERE,sResponse);
-        refreshConfigurationFromInputStream(IOUtils.toInputStream(sResponse));
+		Logger.getLogger(SmartHomeSession.class.getName()).log(Level.SEVERE,sResponse);
+        try {
+			refreshConfigurationFromInputStream(IOUtils.toInputStream(sResponse,"UTF8"));
+		} catch (IOException e) {
+			throw new SmartHomeSessionExpiredException(e);
+		}
         return sResponse;
     }
 
@@ -237,8 +269,11 @@ public class SmartHomeSession implements Serializable {
     public ConcurrentHashMap<String,? extends LogicalDevice> getSwitchActuators(){
         return this.switchActuators;
     }
+    public ConcurrentHashMap<String,? extends LogicalDevice> getDimmerActuators(){
+        return this.dimmerActuators;
+    }
     public ConcurrentHashMap<String, ? extends LogicalDevice> getGenericActuators() {
-		return genericActuators;
+		return baseActuators;
 	}
 
 	public ConcurrentHashMap<String,? extends LogicalDevice> getRoomTemperatureActuators(){
@@ -258,6 +293,14 @@ public class SmartHomeSession implements Serializable {
         Logger.getLogger(SmartHomeSession.class.getName()).log(Level.FINE, "Switching: " + switchOnRequest);
         sResponse = executeRequest(switchOnRequest, "/cmd");
     }
+    
+    public void switchDimmerState(String deviceId, int currentValue) throws SmartHomeSessionExpiredException {
+        String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + getSessionId() + "\" BasedOnConfigVersion=\"" + currentConfigurationVersion + "\"><ActuatorStates><LogicalDeviceState xsi:type=\"SwitchActuatorState\" LID=\"" + deviceId + "\" DmLvl=\"" + currentValue + "\" /></ActuatorStates></BaseRequest>";
+        Logger.getLogger(SmartHomeSession.class.getName()).log(Level.FINE, "Set dimmer state: " + switchOnRequest);
+        String sResponse = executeRequest(switchOnRequest, "/cmd");
+        Logger.getLogger(SmartHomeSession.class.getName()).log(Level.INFO, "Response: " + sResponse);
+    }
+    
     public void roomTemperatureActuatorChangeState(String deviceId, String temperature) throws SmartHomeSessionExpiredException {
         String temperatureChangeRequest;
         String sResponse = "";
@@ -283,7 +326,6 @@ public class SmartHomeSession implements Serializable {
             se.setContentType("text/xml");
             httpPost.setEntity(se);
             response1 = httpclient.execute(httpPost);
-            System.out.println(response1.getStatusLine());
             HttpEntity entity1 = response1.getEntity();
             InputStream in = entity1.getContent();
             sReturn = InputStream2String.copyFromInputStream(in, "UTF-8");
@@ -365,22 +407,23 @@ public class SmartHomeSession implements Serializable {
 
 	public LogicalDevice getLogicalDeviceByRoomNameAndDeviceName(String roomName, String deviceName) {
 		LogicalDevice foundLogDev = getLogicalDeviceByRoomNameAndDeviceName(roomName, deviceName, switchActuators);
-		if (foundLogDev != null)
+		if (foundLogDev != null) {
 			return foundLogDev;
-		else
-		{
-			foundLogDev = getLogicalDeviceByRoomNameAndDeviceName(roomName, deviceName, genericActuators);
-			if (foundLogDev != null)
-				return foundLogDev;
-			else
-			{
-				foundLogDev = getLogicalDeviceByRoomNameAndDeviceName(roomName, deviceName, this.roomTemperatureActuators);
-				if (foundLogDev != null)
-					return foundLogDev;
-				
-			}
 		}
-		return null;		
+		foundLogDev = getLogicalDeviceByRoomNameAndDeviceName(roomName, deviceName, baseActuators);
+		if (foundLogDev != null) {
+			return foundLogDev;
+		}
+		foundLogDev = getLogicalDeviceByRoomNameAndDeviceName(roomName, deviceName, this.roomTemperatureActuators);
+		if (foundLogDev != null) {
+			return foundLogDev;
+		}
+		foundLogDev = getLogicalDeviceByRoomNameAndDeviceName(roomName, deviceName, this.smokeDetectorSensors);
+		if (foundLogDev != null) {
+			return foundLogDev;
+		}
+		foundLogDev = getLogicalDeviceByRoomNameAndDeviceName(roomName, deviceName, this.dimmerActuators);
+		return foundLogDev;
 	}
 	
 	private LogicalDevice getLogicalDeviceByRoomNameAndDeviceName(String roomName, String deviceName, ConcurrentHashMap<String,? extends LogicalDevice> logicalDevices) {
@@ -394,6 +437,40 @@ public class SmartHomeSession implements Serializable {
 			}
 		}
 		return foundLogDev;
+	}
+	
+	public SMSActuator getSMSActuator() {
+		
+		Iterator it = baseActuators.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pairs = (Map.Entry)it.next();
+	        if(baseActuators.get(pairs.getKey()) instanceof SMSActuator) {
+	        	return (SMSActuator) baseActuators.get(pairs.getKey());
+	        }
+	    }
+	    return null;
+	}
+
+	public EMailActuator getEMailActuator() {
+		Iterator it = baseActuators.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pairs = (Map.Entry)it.next();
+	        if(baseActuators.get(pairs.getKey()) instanceof EMailActuator) {
+	        	return (EMailActuator) baseActuators.get(pairs.getKey());
+	        }
+	    }
+	    return null;
+	}
+
+	public DaySensor getDaySensor() {
+		Iterator it = baseSensors.entrySet().iterator();
+	    while (it.hasNext()) {
+	        Map.Entry pairs = (Map.Entry)it.next();
+	        if(baseSensors.get(pairs.getKey()) instanceof DaySensor) {
+	        	return (DaySensor) baseSensors.get(pairs.getKey());
+	        }
+	    }
+	    return null;
 	}
 
 	}

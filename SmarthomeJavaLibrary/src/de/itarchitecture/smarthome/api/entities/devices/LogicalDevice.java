@@ -17,14 +17,22 @@ public class LogicalDevice extends SmartHomeDevice{
     public static final String Type_SwitchActuatorState = "SwitchActuatorState";
     public static final String Type_RoomTemperatureActuatorState = "RoomTemperatureActuatorState";
     public static final String Type_RoomHumiditySensorState = "RoomHumiditySensorState";
+    public static final String Type_GenericSensor = "GenericSensor";
+    	public static final String Type_DaySensor = "DaySensor";
     public static final String Type_RoomTemperatureSensorState = "RoomTemperatureSensorState";
     public static final String Type_SwitchActuator = "SwitchActuator";
+    public static final String Type_PushButtonSensor = "PushButtonSensor";
+    public static final String Type_DimmerActuator = "DimmerActuator";
     public static final String Type_RoomTemperatureActuator = "RoomTemperatureActuator";
     public static final String Type_RoomHumiditySensor = "RoomHumiditySensor";
     public static final String Type_RoomTemperatureSensor = "RoomTemperatureSensor";
 	public static final String Type_GenericActuator = "GenericActuator";
+		public static final String Type_SMSActuator = "SMSActuator";
+		public static final String Type_EMailActuator = "EMailActuator";
 	public static final String Type_GenericActuatorState = "GenericDeviceState";
 	public static final String Type_WindowDoorSensor = "WindowDoorSensor";
+	public static final String Type_SmokeDetectorSensor = "SmokeDetectorSensor";
+    public static final String Type_AlarmActuator = "AlarmActuator";
 	public static final String Type_WindowDoorSensorState = "WindowDoorSensorState";
 
     private String logicalDeviceId = "";

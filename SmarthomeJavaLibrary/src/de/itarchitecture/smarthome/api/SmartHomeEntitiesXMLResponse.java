@@ -2,7 +2,7 @@ package de.itarchitecture.smarthome.api;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,22 +10,29 @@ import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.itarchitecture.smarthome.api.entities.SmartHomeLocation;
 import de.itarchitecture.smarthome.api.entities.TemperatureHumidityDevice;
+import de.itarchitecture.smarthome.api.entities.devices.AlarmActuator;
+import de.itarchitecture.smarthome.api.entities.devices.BaseActuator;
+import de.itarchitecture.smarthome.api.entities.devices.BaseSensor;
+import de.itarchitecture.smarthome.api.entities.devices.DaySensor;
+import de.itarchitecture.smarthome.api.entities.devices.DimmerActuator;
+import de.itarchitecture.smarthome.api.entities.devices.EMailActuator;
 import de.itarchitecture.smarthome.api.entities.devices.GenericActuator;
+import de.itarchitecture.smarthome.api.entities.devices.GenericSensor;
 import de.itarchitecture.smarthome.api.entities.devices.LogicalDevice;
+import de.itarchitecture.smarthome.api.entities.devices.PushButtonSensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomHumiditySensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureActuator;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureSensor;
+import de.itarchitecture.smarthome.api.entities.devices.SMSActuator;
+import de.itarchitecture.smarthome.api.entities.devices.SmokeDetectorSensor;
 import de.itarchitecture.smarthome.api.entities.devices.SwitchActuator;
 import de.itarchitecture.smarthome.api.entities.devices.WindowDoorSensor;
 
@@ -38,13 +45,22 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 		return switchActuators;
 	}
 
-	private String currentConfigurationVersion = "";
-	private String correspondingRequestId = "";
+	public ConcurrentHashMap<String, DimmerActuator> getDimmerActuators() {
+		return dimmerActuators;
+	}
+
+//	private String currentConfigurationVersion = "";
+//	private String correspondingRequestId = "";
 	private String responseStatus = "";
 	private ConcurrentHashMap<String, SmartHomeLocation> locations = null;
+	private ConcurrentHashMap<String, PushButtonSensor> pushButtonSensors = null;
 	private ConcurrentHashMap<String, SwitchActuator> switchActuators = null;
-	private ConcurrentHashMap<String, GenericActuator> genericActuators = null;
+	private ConcurrentHashMap<String, DimmerActuator> dimmerActuators = null;
+	private ConcurrentHashMap<String, AlarmActuator> alarmActuators = null;
+	private ConcurrentHashMap<String, BaseActuator> baseActuators = null;
+	private ConcurrentHashMap<String, BaseSensor> baseSensors = null;
 	private ConcurrentHashMap<String, RoomTemperatureSensor> roomTemperatureSensors = null;
+	private ConcurrentHashMap<String, SmokeDetectorSensor> smokeDetectorSensors = null;
 	private ConcurrentHashMap<String, RoomHumiditySensor> roomHumiditySensors = null;
 	private ConcurrentHashMap<String, RoomTemperatureActuator> roomTemperatureActuators = null;
 	private ConcurrentHashMap<String, TemperatureHumidityDevice> temperatureHumidityDevices = null;
@@ -79,11 +95,16 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 			//LogicalDevices
 			NodeList nlLogicalDevices = docEle
 					.getElementsByTagName("LD");
+			pushButtonSensors = new ConcurrentHashMap<String, PushButtonSensor>();
 			switchActuators = new ConcurrentHashMap<String, SwitchActuator>();
-			genericActuators = new ConcurrentHashMap<String, GenericActuator>();
+			dimmerActuators = new ConcurrentHashMap<String, DimmerActuator>();
+			alarmActuators = new ConcurrentHashMap<String, AlarmActuator>();
+			baseActuators = new ConcurrentHashMap<String, BaseActuator>();
+			baseSensors = new ConcurrentHashMap<String, BaseSensor>();
 			roomTemperatureActuators = new ConcurrentHashMap<String, RoomTemperatureActuator>();
 			roomHumiditySensors = new ConcurrentHashMap<String, RoomHumiditySensor>();
 			roomTemperatureSensors = new ConcurrentHashMap<String, RoomTemperatureSensor>();
+			smokeDetectorSensors  = new ConcurrentHashMap<String, SmokeDetectorSensor>();
 			temperatureHumidityDevices = new ConcurrentHashMap<String, TemperatureHumidityDevice>();
 			windowDoorSensors = new ConcurrentHashMap<String, WindowDoorSensor>();
 			mapRoomsToTemperatureActuators = new ConcurrentHashMap<String, String>();
@@ -93,7 +114,12 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 				for (int i = 0; i < nlLogicalDevices.getLength(); i++) {
 					Element logDevEl = (Element) nlLogicalDevices.item(i);
 					LogicalDevice logDev = getLogicalDevice(logDevEl);
-					logDev.setLocation(locations.get(logDev.getLocationId()));
+					if (logDev!=null) {
+						if (!logDev.getDeviceName().equals("")) {
+							Logger.getLogger(SmartHomeEntitiesXMLResponse.class.getName()).log(Level.FINEST,logDev.getDeviceName());
+						}
+						logDev.setLocation(locations.get(logDev.getLocationId()));
+					}
 				}
 			}
 
@@ -251,8 +277,8 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 					"Name"));
 			roomTemperatureSensor.setLocationId(getTextValueFromAttribute(devEl,
 					"LCID"));
-			NodeList underlyingDevNodes = devEl
-					.getElementsByTagName("UDvIds");
+//			NodeList underlyingDevNodes = devEl
+//					.getElementsByTagName("UDvIds");
 			roomTemperatureSensors.put(roomTemperatureSensor.getDeviceId(),
 					roomTemperatureSensor);
 			mapRoomsToTemperatureSensors.put(
@@ -270,6 +296,60 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 						tempHumDev);
 			}
 			tempHumDev.setTemperatureSensor(roomTemperatureSensor);
+		} else if (LogicalDevice.Type_SmokeDetectorSensor.equals(sType)) {
+			SmokeDetectorSensor smokeDetectorSensor = new SmokeDetectorSensor();
+			smokeDetectorSensor.setLogicalDeviceId(getTextValueFromElements(
+					devEl, "Id"));
+			smokeDetectorSensor.setDeviceName(getTextValueFromAttribute(devEl, "Name"));
+			smokeDetectorSensor.setLocationId(getTextValueFromAttribute(devEl,
+					"LCID"));
+			smokeDetectorSensor.setBaseDeviceId(getTextValueFromElements(devEl,
+			"BDId"));
+			smokeDetectorSensors.put(smokeDetectorSensor.getLocationId(),
+					smokeDetectorSensor);
+			logicalDevice = smokeDetectorSensor;
+		} else if (LogicalDevice.Type_AlarmActuator.equals(sType)) {
+			AlarmActuator alarmActuator = new AlarmActuator();
+			alarmActuator.setLogicalDeviceType(LogicalDevice.Type_AlarmActuator);
+			alarmActuator.setLogicalDeviceId(getTextValueFromElements(devEl, "Id"));
+			alarmActuator.setDeviceName(getTextValueFromAttribute(devEl, "Name"));
+			alarmActuator.setLocationId(getTextValueFromAttribute(devEl, "LCID"));
+			alarmActuator.setBaseDeviceId(getTextValueFromElements(devEl, "BDId"));
+			alarmActuator.setActuatorClass(getTextValueFromElements(devEl, "ActCls"));
+			
+			alarmActuator.setOn(getBooleanValueFromElements(devEl, "IsOn"));
+			alarmActuator.setAlarmDuration(getIntValueFromElements(devEl, "AlarmDuration"));
+			
+			alarmActuators.put(alarmActuator.getLocationId(), alarmActuator);
+			logicalDevice = alarmActuator;
+		
+		} else if (LogicalDevice.Type_DimmerActuator.equals(sType)) {
+			DimmerActuator dimmerActuator = new DimmerActuator();
+			dimmerActuator.setLogicalDeviceType(LogicalDevice.Type_DimmerActuator);
+			dimmerActuator.setLogicalDeviceId(getTextValueFromElements(devEl, "Id"));
+			dimmerActuator.setDeviceName(getTextValueFromAttribute(devEl, "Name"));
+			dimmerActuator.setLocationId(getTextValueFromAttribute(devEl, "LCID"));
+			dimmerActuator.setBaseDeviceId(getTextValueFromElements(devEl, "BDId"));
+			dimmerActuator.setActuatorClass(getTextValueFromElements(devEl, "ActCls"));
+
+			dimmerActuator.setMax(getIntValueFromElements(devEl, "TMxV"));
+			dimmerActuator.setMin(getIntValueFromElements(devEl, "TMnV"));
+			dimmerActuator.setDimLevel(getIntValueFromElements(devEl, "DmLvl"));
+
+			dimmerActuators.put(dimmerActuator.getDeviceId(), dimmerActuator);
+			logicalDevice = dimmerActuator;
+		} else if (LogicalDevice.Type_PushButtonSensor.equals(sType)) {
+			PushButtonSensor pushButtonSensor = new PushButtonSensor();
+			pushButtonSensor.setLogicalDeviceType(LogicalDevice.Type_DimmerActuator);
+			pushButtonSensor.setLogicalDeviceId(getTextValueFromElements(devEl,"Id"));
+			pushButtonSensor.setDeviceName(getTextValueFromAttribute(devEl, "Name"));
+			pushButtonSensor.setLocationId(getTextValueFromAttribute(devEl,"LCID"));
+			pushButtonSensor.setBaseDeviceId(getTextValueFromElements(devEl,"BDId"));
+			
+			pushButtonSensor.setButtonCount(getIntValueFromElements(devEl,"ButtonCount"));
+			
+			pushButtonSensors.put(pushButtonSensor.getDeviceId(), pushButtonSensor);
+			logicalDevice = pushButtonSensor;
 		} else if (LogicalDevice.Type_SwitchActuator.equals(sType)) {
 			SwitchActuator switchActuator = new SwitchActuator();
 			switchActuator
@@ -289,9 +369,62 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 			switchActuators.put(switchActuator.getDeviceId(), switchActuator);
 			logicalDevice = switchActuator;
 		} else if (LogicalDevice.Type_GenericActuator.equals(sType)) {
+			NodeList nodes = devEl.getElementsByTagName("Ppt");
+        	if (nodes.getLength()!=1) {
+    			// Puffern
+        		HashMap<String,String> cache = new HashMap<String,String>();
+        		for (int i=0; i<nodes.getLength();i++) {
+        			String name = getTextValueFromAttribute((Element)nodes.item(i), "Name");
+        			String value = getTextValueFromAttribute((Element)nodes.item(i), "Value");
+        			cache.put(name,value);
+        		}
+        		// Auswerten und Objekte anlegen
+        		if (cache.containsKey("EmailPeriod")) {
+        			// E-Mail Actuator
+        			EMailActuator emailActuator = new EMailActuator();
+        			emailActuator.setLogicalDeviceType(LogicalDevice.Type_EMailActuator);
+        			emailActuator.setLogicalDeviceId(getTextValueFromElements(devEl,"Id"));
+        			emailActuator.setDeviceName(getTextValueFromAttribute(devEl,"Name"));
+        			emailActuator.setLocationId(getTextValueFromAttribute(devEl,"LCID"));
+        			emailActuator.setBaseDeviceId(getTextValueFromElements(devEl,"BDId"));
+        			emailActuator.setActuatorClass(getTextValueFromElements(devEl,"ActCls"));
+        			emailActuator.setEmailMaxPeriod(cache.get("EmailMaxPeriod"));
+        			emailActuator.setEmailPeriod(cache.get("EmailPeriod"));
+        			emailActuator.setEmailMessage("EmailMessage");
+        			int i = 0;
+        			while (cache.containsKey("EmailName_"+i)) {
+        				emailActuator.addUser(cache.get("EmailName_"+i), cache.get("EmailAddress_"+i));
+        				i++;
+        			}
+        			baseActuators.put(emailActuator.getDeviceId(), (BaseActuator)emailActuator);
+        			logicalDevice = emailActuator;
+        		}
+        		if (cache.containsKey("SMSPeriod")) {
+        			// SMSActuator
+        			SMSActuator smsActuator = new SMSActuator();
+        			smsActuator.setLogicalDeviceType(LogicalDevice.Type_SMSActuator);
+        			smsActuator.setLogicalDeviceId(getTextValueFromElements(devEl,"Id"));
+        			smsActuator.setDeviceName(getTextValueFromAttribute(devEl,"Name"));
+        			smsActuator.setLocationId(getTextValueFromAttribute(devEl,"LCID"));
+        			smsActuator.setBaseDeviceId(getTextValueFromElements(devEl,"BDId"));
+        			smsActuator.setActuatorClass(getTextValueFromElements(devEl,"ActCls"));
+        			smsActuator.setSMSMaxPeriod(cache.get("SMSMaxPeriod"));
+        			smsActuator.setSMSPeriod(cache.get("SMSPeriod"));
+        			smsActuator.setSMSMessage("SMSMessage");
+        			int i = 0;
+        			while (cache.containsKey("SMSName_"+i)) {
+        				smsActuator.addUser(cache.get("SMSName_"+i), cache.get("SMSPhoneNumber_"+i));
+        				i++;
+        			}
+        			baseActuators.put(smsActuator.getDeviceId(), (BaseActuator)smsActuator);
+        			logicalDevice = smsActuator;
+        		}
+        		cache.clear();
+        		return logicalDevice;
+        	}
 			GenericActuator genericActuator = new GenericActuator();
 			genericActuator
-					.setLogicalDeviceType(LogicalDevice.Type_SwitchActuator);
+					.setLogicalDeviceType(LogicalDevice.Type_GenericActuator);
 			genericActuator.setLogicalDeviceId(getTextValueFromElements(devEl,
 					"Id"));
 			genericActuator.setDeviceName(getTextValueFromAttribute(devEl,
@@ -302,15 +435,54 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 					"BDId"));
 			genericActuator.setActuatorClass(getTextValueFromElements(devEl,
 					"ActCls"));
-			genericActuators
-					.put(genericActuator.getDeviceId(), genericActuator);
+			baseActuators
+					.put(genericActuator.getDeviceId(), (BaseActuator)genericActuator);
 			logicalDevice = genericActuator;
+		} else if (LogicalDevice.Type_GenericSensor.equals(sType)) {
+			NodeList nodes = devEl.getElementsByTagName("Ppt");
+        	if (nodes.getLength()!=1) {
+    			// Puffern
+        		HashMap<String,String> cache = new HashMap<String,String>();
+        		for (int i=0; i<nodes.getLength();i++) {
+        			String name = getTextValueFromAttribute((Element)nodes.item(i), "Name");
+        			String value = getTextValueFromAttribute((Element)nodes.item(i), "Value");
+        			cache.put(name,value);
+        		}
+        		// Auswerten und Objekte anlegen
+        		if (cache.containsKey("Latitude")) {
+        			DaySensor dayActuator = new DaySensor();
+        			dayActuator.setLogicalDeviceType(LogicalDevice.Type_DaySensor);
+        			dayActuator.setLogicalDeviceId(getTextValueFromElements(devEl,"Id"));
+        			dayActuator.setDeviceName(getTextValueFromAttribute(devEl,"Name"));
+        			dayActuator.setLocationId(getTextValueFromAttribute(devEl,"LCID"));
+        			dayActuator.setBaseDeviceId(getTextValueFromElements(devEl,"BDId"));
+        			dayActuator.setLatitude(cache.get("Latitude"));
+        			dayActuator.setLongitude(cache.get("Longitude"));
+        			baseSensors.put(dayActuator.getDeviceId(), (GenericSensor)dayActuator);
+        		}
+        		
+        		cache.clear();
+        		return logicalDevice;
+        	}
+			GenericSensor genericSensor = new GenericSensor();
+			genericSensor.setLogicalDeviceType(LogicalDevice.Type_GenericSensor);
+			genericSensor.setLogicalDeviceId(getTextValueFromElements(devEl,"Id"));
+			genericSensor.setDeviceName(getTextValueFromAttribute(devEl,"Name"));
+			genericSensor.setLocationId(getTextValueFromAttribute(devEl,"LCID"));
+			genericSensor.setBaseDeviceId(getTextValueFromElements(devEl,"BDId"));
+			baseSensors.put(genericSensor.getDeviceId(), genericSensor);
+			logicalDevice = genericSensor;
 		} else {
 			logicalDevice = new LogicalDevice();
 			logicalDevice.setLogicalDeviceType(LogicalDevice.Type_Generic);
+			
+			if ((!sType.contains("Sensor"))&&(!sType.contains("Actuator"))) {
+				Logger.getLogger(SmartHomeEntitiesXMLResponse.class.getName()).log(
+						Level.INFO, "-2-----------new/unknown logical device: "+sType);
+			}
+			logicalDevice.setLogicalDeviceId(getTextValueFromElements(devEl, "Id"));
 		}
 
-		logicalDevice.setLogicalDeviceId(getTextValueFromElements(devEl, "Id"));
 		return logicalDevice;
 	}
 
@@ -328,6 +500,20 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 		return roomTemperatureSensors;
 	}
 
+	/**
+	 * @return the roomTemperatureSensors
+	 */
+	public ConcurrentHashMap<String, SmokeDetectorSensor> getSmokeDetectorSensors() {
+		return smokeDetectorSensors;
+	}
+	
+	/**
+	 * @return the roomTemperatureSensors
+	 */
+	public ConcurrentHashMap<String, PushButtonSensor> getPushButtonSensors() {
+		return pushButtonSensors;
+	}
+	
 	/**
 	 * @return the roomHumiditySensors
 	 */
@@ -360,12 +546,16 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 		return roomTemperatureActuators;
 	}
 
-	public ConcurrentHashMap<String, ? extends LogicalDevice> getGenericActuators() {
-		return genericActuators;
+	public ConcurrentHashMap<String, ? extends LogicalDevice> getBaseActuators() {
+		return baseActuators;
 	}
 
+	public ConcurrentHashMap<String, ? extends LogicalDevice> getBaseSensors() {
+		return baseSensors;
+	}
+	
 	public ConcurrentHashMap<String, ? extends LogicalDevice> getWindowDoorSensors() {
 		return windowDoorSensors;
 	}
-
+	
 }

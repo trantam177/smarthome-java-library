@@ -15,6 +15,8 @@ public class SwitchActuator extends BaseActuator implements SmartHomeSwitch {
     private SwitchDefaultOffSettings defaultOffSettings = new SwitchDefaultOffSettings();
     
     public final String TYPE_LIGHT = "Light";
+    
+    private boolean sensingBehavior = true;
 
     public SwitchActuator() {
         this.setType(LogicalDevice.Type_SwitchActuator);
@@ -49,4 +51,12 @@ public class SwitchActuator extends BaseActuator implements SmartHomeSwitch {
     public void setDefaultOffSettings(SwitchDefaultOffSettings defaultOffSettings) {
         this.defaultOffSettings = defaultOffSettings;
     }
+
+	public boolean isSensingBehavior() {
+		return sensingBehavior;
+	}
+
+	public void setSensingBehavior(boolean sensingBehavior) {
+		this.sensingBehavior = sensingBehavior;
+	}
 }

@@ -3,10 +3,11 @@
  */
 package de.itarchitecture.smarthome.api.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.awt.event.WindowStateListener;
-import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.After;
@@ -16,6 +17,7 @@ import org.junit.Test;
 import de.itarchitecture.smarthome.api.SmartHomeSession;
 import de.itarchitecture.smarthome.api.entities.SmartHomeLocation;
 import de.itarchitecture.smarthome.api.entities.TemperatureHumidityDevice;
+import de.itarchitecture.smarthome.api.entities.devices.DimmerActuator;
 import de.itarchitecture.smarthome.api.entities.devices.GenericActuator;
 import de.itarchitecture.smarthome.api.entities.devices.LogicalDevice;
 import de.itarchitecture.smarthome.api.entities.devices.RoomHumiditySensor;
@@ -28,11 +30,10 @@ import de.itarchitecture.smarthome.api.exceptions.SHTechnicalException;
 import de.itarchitecture.smarthome.api.exceptions.SmartHomeSessionExpiredException;
 
 /**
- * @author michael
- * 
+ * @author michael, sammy98
  */
 public class SmarthomeApiTest {
-	String username = "username";
+	String username = "user";
 	String password = "password";
 	String hostname = "smarthome";
 	SmartHomeSession smarthomeSession = new SmartHomeSession();
@@ -59,6 +60,53 @@ public class SmarthomeApiTest {
 		smarthomeSession.destroy();
 	}
 
+	@Test
+	public void testDimmerActuator() {
+		DimmerActuator dimmerActuator = (DimmerActuator) smarthomeSession
+				.getLogicalDeviceByRoomNameAndDeviceName("WOHNZIMMER",
+						"Dimmer-Unterputz");
+		assertNotNull(dimmerActuator);
+		int dmlvl = dimmerActuator.getDimLevel();
+		try {
+			smarthomeSession.switchDimmerState(
+					dimmerActuator.getDeviceId(), 50);
+			smarthomeSession.refreshLogicalDeviceState();
+			dimmerActuator = (DimmerActuator) smarthomeSession
+					.getLogicalDeviceByRoomNameAndDeviceName("WOHNZIMMER",
+							"Dimmer-Unterputz");
+			assertTrue(dimmerActuator.getDimLevel()!=dmlvl);
+			smarthomeSession.switchDimmerState(
+					dimmerActuator.getDeviceId(), dmlvl);
+		} catch (SmartHomeSessionExpiredException e) {
+			fail(e.getMessage());
+		}
+	}
+
+	@Test
+	public void getEMailActuator() {
+		assertNotNull(smarthomeSession.getEMailActuator());
+	}
+
+	@Test
+	public void getSMSActuator() {
+		assertNotNull(smarthomeSession.getSMSActuator());
+	}
+	
+	@Test
+	public void getDaySensor() {
+		assertNotNull(smarthomeSession.getDaySensor());
+	}
+
+	@Test
+	public void getSmokeDetectorSensors() {
+		assertTrue(smarthomeSession.getSmokeDetectorSensors().size()!=0);
+	}
+
+	@Test
+	public void getPushButtonSensors() {
+		assertTrue(smarthomeSession.getPushButtonSensors().size()!=0);
+	}
+	
 	/**
 	 * Test method for
 	 * {@link de.itarchitecture.smarthome.api.SmartHomeSession#getWindowDoorSensors()}
@@ -260,8 +308,8 @@ public class SmarthomeApiTest {
 	@Test
 	public void testSwitchActuatorChangeState() {
 		SwitchActuator switchActuator = (SwitchActuator) smarthomeSession
-				.getLogicalDeviceByRoomNameAndDeviceName("WOHNZIMMER",
-						"SteckerKlavier");
+				.getLogicalDeviceByRoomNameAndDeviceName("KINDERZIMMER",
+						"Nachtlampe");
 		assertNotNull(switchActuator);
 		boolean previousState = switchActuator.getIsOn();
 		try {
@@ -269,8 +317,8 @@ public class SmarthomeApiTest {
 					switchActuator.getDeviceId(), !previousState);
 			smarthomeSession.refreshLogicalDeviceState();
 			switchActuator = (SwitchActuator) smarthomeSession
-					.getLogicalDeviceByRoomNameAndDeviceName("WOHNZIMMER",
-							"SteckerKlavier");
+					.getLogicalDeviceByRoomNameAndDeviceName("KINDERZIMMER",
+							"Nachtlampe");
 			assertTrue(switchActuator.getIsOn().equals(!previousState));
 			smarthomeSession.switchActuatorChangeState(
 					switchActuator.getDeviceId(), previousState);
