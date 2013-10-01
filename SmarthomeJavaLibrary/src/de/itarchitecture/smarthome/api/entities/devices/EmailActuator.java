@@ -5,22 +5,25 @@ package de.itarchitecture.smarthome.api.entities.devices;
  *
  * @author sammy98
  */
-public class EMailActuator extends SpecialActuator {
+public class EmailActuator extends SpecialActuator {
 
 	/** The Email period. */
-	private String EmailPeriod;
+	private String emailPeriod;
 	
 	/** The Email max period. */
-	private String EmailMaxPeriod;
+	private String emailMaxPeriod;
 	
 	/** The Email message. */
-	private String EmailMessage;
+	private String emailMessage;
 		
-    /**
+	/** The email available. */
+	private int emailAvailable;
+    
+	/**
      * Instantiates a new sMS actuator.
      */
-    public EMailActuator() {
-        this.setType(LogicalDevice.Type_SMSActuator);
+    public EmailActuator() {
+        this.setType(LogicalDevice.Type_EmailActuator);
     }
 	
 	/**
@@ -29,7 +32,7 @@ public class EMailActuator extends SpecialActuator {
 	 * @return the email period
 	 */
 	public String getEmailPeriod() {
-		return EmailPeriod;
+		return emailPeriod;
 	}
 
 	/**
@@ -38,7 +41,7 @@ public class EMailActuator extends SpecialActuator {
 	 * @param emailPeriod the new email period
 	 */
 	public void setEmailPeriod(String emailPeriod) {
-		EmailPeriod = emailPeriod;
+		this.emailPeriod = emailPeriod;
 	}
 
 	/**
@@ -47,7 +50,7 @@ public class EMailActuator extends SpecialActuator {
 	 * @return the email max period
 	 */
 	public String getEmailMaxPeriod() {
-		return EmailMaxPeriod;
+		return emailMaxPeriod;
 	}
 
 	/**
@@ -56,7 +59,7 @@ public class EMailActuator extends SpecialActuator {
 	 * @param emailMaxPeriod the new email max period
 	 */
 	public void setEmailMaxPeriod(String emailMaxPeriod) {
-		EmailMaxPeriod = emailMaxPeriod;
+		this.emailMaxPeriod = emailMaxPeriod;
 	}
 
 	/**
@@ -65,7 +68,7 @@ public class EMailActuator extends SpecialActuator {
 	 * @return the email message
 	 */
 	public String getEmailMessage() {
-		return EmailMessage;
+		return emailMessage;
 	}
 
 	/**
@@ -74,7 +77,25 @@ public class EMailActuator extends SpecialActuator {
 	 * @param emailMessage the new email message
 	 */
 	public void setEmailMessage(String emailMessage) {
-		EmailMessage = emailMessage;
+		this.emailMessage = emailMessage;
+	}
+
+	/**
+	 * Gets the email available.
+	 *
+	 * @return the email available
+	 */
+	public int getEmailAvailable() {
+		return emailAvailable;
+	}
+
+	/**
+	 * Sets the email available.
+	 *
+	 * @param emailAvailable the new email available
+	 */
+	public void setEmailAvailable(int emailAvailable) {
+		this.emailAvailable = emailAvailable;
 	}
 
 }

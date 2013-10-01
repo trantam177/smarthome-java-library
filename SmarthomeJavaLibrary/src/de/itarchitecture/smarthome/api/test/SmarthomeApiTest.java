@@ -17,6 +17,7 @@ import org.junit.Test;
 import de.itarchitecture.smarthome.api.SmartHomeSession;
 import de.itarchitecture.smarthome.api.entities.SmartHomeLocation;
 import de.itarchitecture.smarthome.api.entities.TemperatureHumidityDevice;
+import de.itarchitecture.smarthome.api.entities.devices.BaseActuator;
 import de.itarchitecture.smarthome.api.entities.devices.DimmerActuator;
 import de.itarchitecture.smarthome.api.entities.devices.GenericActuator;
 import de.itarchitecture.smarthome.api.entities.devices.LogicalDevice;
@@ -33,9 +34,9 @@ import de.itarchitecture.smarthome.api.exceptions.SmartHomeSessionExpiredExcepti
  * @author michael, sammy98
  */
 public class SmarthomeApiTest {
-	String username = "user";
-	String password = "password";
-	String hostname = "smarthome";
+	String username = "sammy98";
+	String password = "ww8oi33";
+	String hostname = "192.168.1.124";
 	SmartHomeSession smarthomeSession = new SmartHomeSession();
 
 	/**
@@ -60,8 +61,13 @@ public class SmarthomeApiTest {
 		smarthomeSession.destroy();
 	}
 
+//	@Test
+//	public void internal() throws SmartHomeSessionExpiredException {
+//		smarthomeSession.refreshLogicalDeviceState();
+//	}
+	
 	@Test
-	public void testDimmerActuator() {
+	public void testDimmerActuator() throws SmartHomeSessionExpiredException {
 		DimmerActuator dimmerActuator = (DimmerActuator) smarthomeSession
 				.getLogicalDeviceByRoomNameAndDeviceName("WOHNZIMMER",
 						"Dimmer-Unterputz");
@@ -69,27 +75,29 @@ public class SmarthomeApiTest {
 		int dmlvl = dimmerActuator.getDimLevel();
 		try {
 			smarthomeSession.switchDimmerState(
-					dimmerActuator.getDeviceId(), 50);
+					dimmerActuator.getDeviceId(), 10);
 			smarthomeSession.refreshLogicalDeviceState();
 			dimmerActuator = (DimmerActuator) smarthomeSession
 					.getLogicalDeviceByRoomNameAndDeviceName("WOHNZIMMER",
 							"Dimmer-Unterputz");
 			assertTrue(dimmerActuator.getDimLevel()!=dmlvl);
-			smarthomeSession.switchDimmerState(
-					dimmerActuator.getDeviceId(), dmlvl);
+			
 		} catch (SmartHomeSessionExpiredException e) {
 			fail(e.getMessage());
+		} finally {
+			smarthomeSession.switchDimmerState(
+					dimmerActuator.getDeviceId(), dmlvl);
 		}
 	}
 
 	@Test
 	public void getEMailActuator() {
-		assertNotNull(smarthomeSession.getEMailActuator());
+		assertNotNull(smarthomeSession.getEmailActuator());
 	}
 
 	@Test
 	public void getSMSActuator() {
-		assertNotNull(smarthomeSession.getSMSActuator());
+		assertNotNull(smarthomeSession.getSmsActuator());
 	}
 	
 	@Test
@@ -278,10 +286,10 @@ public class SmarthomeApiTest {
 	 * .
 	 */
 	@Test
-	public void testGetGenericActuators() {
+	public void testGetBaseActuators() {
 		ConcurrentHashMap<String, ? extends LogicalDevice> genActuators = smarthomeSession
 				.getGenericActuators();
-		GenericActuator genAct = (GenericActuator) genActuators.elements()
+		BaseActuator genAct = (BaseActuator) genActuators.elements()
 				.nextElement();
 		assertFalse("".equals(genAct.getDeviceId()));
 	}

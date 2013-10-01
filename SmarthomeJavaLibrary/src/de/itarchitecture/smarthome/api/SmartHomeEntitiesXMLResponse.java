@@ -23,7 +23,7 @@ import de.itarchitecture.smarthome.api.entities.devices.BaseActuator;
 import de.itarchitecture.smarthome.api.entities.devices.BaseSensor;
 import de.itarchitecture.smarthome.api.entities.devices.DaySensor;
 import de.itarchitecture.smarthome.api.entities.devices.DimmerActuator;
-import de.itarchitecture.smarthome.api.entities.devices.EMailActuator;
+import de.itarchitecture.smarthome.api.entities.devices.EmailActuator;
 import de.itarchitecture.smarthome.api.entities.devices.GenericActuator;
 import de.itarchitecture.smarthome.api.entities.devices.GenericSensor;
 import de.itarchitecture.smarthome.api.entities.devices.LogicalDevice;
@@ -31,8 +31,8 @@ import de.itarchitecture.smarthome.api.entities.devices.PushButtonSensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomHumiditySensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureActuator;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureSensor;
-import de.itarchitecture.smarthome.api.entities.devices.SMSActuator;
 import de.itarchitecture.smarthome.api.entities.devices.SmokeDetectorSensor;
+import de.itarchitecture.smarthome.api.entities.devices.SmsActuator;
 import de.itarchitecture.smarthome.api.entities.devices.SwitchActuator;
 import de.itarchitecture.smarthome.api.entities.devices.WindowDoorSensor;
 
@@ -381,8 +381,8 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
         		// Auswerten und Objekte anlegen
         		if (cache.containsKey("EmailPeriod")) {
         			// E-Mail Actuator
-        			EMailActuator emailActuator = new EMailActuator();
-        			emailActuator.setLogicalDeviceType(LogicalDevice.Type_EMailActuator);
+        			EmailActuator emailActuator = new EmailActuator();
+        			emailActuator.setLogicalDeviceType(LogicalDevice.Type_EmailActuator);
         			emailActuator.setLogicalDeviceId(getTextValueFromElements(devEl,"Id"));
         			emailActuator.setDeviceName(getTextValueFromAttribute(devEl,"Name"));
         			emailActuator.setLocationId(getTextValueFromAttribute(devEl,"LCID"));
@@ -401,16 +401,16 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
         		}
         		if (cache.containsKey("SMSPeriod")) {
         			// SMSActuator
-        			SMSActuator smsActuator = new SMSActuator();
-        			smsActuator.setLogicalDeviceType(LogicalDevice.Type_SMSActuator);
+        			SmsActuator smsActuator = new SmsActuator();
+        			smsActuator.setLogicalDeviceType(LogicalDevice.Type_SmsActuator);
         			smsActuator.setLogicalDeviceId(getTextValueFromElements(devEl,"Id"));
         			smsActuator.setDeviceName(getTextValueFromAttribute(devEl,"Name"));
         			smsActuator.setLocationId(getTextValueFromAttribute(devEl,"LCID"));
         			smsActuator.setBaseDeviceId(getTextValueFromElements(devEl,"BDId"));
         			smsActuator.setActuatorClass(getTextValueFromElements(devEl,"ActCls"));
-        			smsActuator.setSMSMaxPeriod(cache.get("SMSMaxPeriod"));
-        			smsActuator.setSMSPeriod(cache.get("SMSPeriod"));
-        			smsActuator.setSMSMessage("SMSMessage");
+        			smsActuator.setSmsMaxPeriod(cache.get("SMSMaxPeriod"));
+        			smsActuator.setSmsPeriod(cache.get("SMSPeriod"));
+        			smsActuator.setSmsMessage("SMSMessage");
         			int i = 0;
         			while (cache.containsKey("SMSName_"+i)) {
         				smsActuator.addUser(cache.get("SMSName_"+i), cache.get("SMSPhoneNumber_"+i));

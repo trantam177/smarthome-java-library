@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
-
 //import android.util.Base64;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -35,15 +34,15 @@ import org.xml.sax.SAXException;
 import de.itarchitecture.smarthome.api.entities.SmartHomeLocation;
 import de.itarchitecture.smarthome.api.entities.TemperatureHumidityDevice;
 import de.itarchitecture.smarthome.api.entities.devices.DaySensor;
-import de.itarchitecture.smarthome.api.entities.devices.EMailActuator;
+import de.itarchitecture.smarthome.api.entities.devices.EmailActuator;
 import de.itarchitecture.smarthome.api.entities.devices.GenericActuator;
 import de.itarchitecture.smarthome.api.entities.devices.LogicalDevice;
 import de.itarchitecture.smarthome.api.entities.devices.PhysicalDevice;
 import de.itarchitecture.smarthome.api.entities.devices.PushButtonSensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomHumiditySensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureSensor;
-import de.itarchitecture.smarthome.api.entities.devices.SMSActuator;
 import de.itarchitecture.smarthome.api.entities.devices.SmokeDetectorSensor;
+import de.itarchitecture.smarthome.api.entities.devices.SmsActuator;
 import de.itarchitecture.smarthome.api.entities.devices.SwitchActuator;
 import de.itarchitecture.smarthome.api.exceptions.LoginFailedException;
 import de.itarchitecture.smarthome.api.exceptions.SHTechnicalException;
@@ -74,7 +73,7 @@ public class SmartHomeSession implements Serializable {
 		return windowDoorSensors;
 	}
 
-	private ConcurrentHashMap<String,? extends LogicalDevice> logicalDevices = null;
+//	private ConcurrentHashMap<String,? extends LogicalDevice> logicalDevices = null;
     private ConcurrentHashMap<String,PhysicalDevice> physicalDevices = null;
     private ConcurrentHashMap<String,SmartHomeLocation> locations = null;
     public ConcurrentHashMap<String, SmartHomeLocation> getLocations() {
@@ -141,7 +140,8 @@ public class SmartHomeSession implements Serializable {
         String logoutrequest = "";
         logoutrequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"LogoutRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + getSessionId() + "\" />";
         try {
-			String sResponse = executeRequest(logoutrequest, "/cmd");
+//			String sResponse = 
+			executeRequest(logoutrequest, "/cmd");
 		} catch (SmartHomeSessionExpiredException e) {
 			// Ignore expired session for logout
 		}
@@ -154,7 +154,7 @@ public class SmartHomeSession implements Serializable {
         String sResponse = "";
         getLogicalDevicesRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"GetAllLogicalDeviceStatesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + this.getSessionId() + "\" BasedOnConfigVersion=\"" + currentConfigurationVersion + "\" />";
         sResponse = executeRequest(getLogicalDevicesRequest, "/cmd");
-		Logger.getLogger(SmartHomeSession.class.getName()).log(Level.FINE,sResponse);
+		Logger.getLogger(SmartHomeSession.class.getName()).log(Level.INFO,sResponse);
         LogicalDeviceXMLResponse logDevXmlRes = new LogicalDeviceXMLResponse();
         logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), switchActuators);
         logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), smokeDetectorSensors);
@@ -281,21 +281,23 @@ public class SmartHomeSession implements Serializable {
     }
     public void getNotifications() throws SmartHomeSessionExpiredException {
         String getNotificationsRequest;
-        String sResponse = "";
+//        String sResponse = "";
         getNotificationsRequest = "";
-        sResponse = executeRequest(getNotificationsRequest, "/upd");
+//        sResponse = 
+		executeRequest(getNotificationsRequest, "/upd");
     }
 
     public void switchActuatorChangeState(String deviceId, boolean bOn) throws SmartHomeSessionExpiredException {
         String switchOnRequest;
-        String sResponse = "";
+//        String sResponse = "";
         switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + getSessionId() + "\" BasedOnConfigVersion=\"" + currentConfigurationVersion + "\"><ActuatorStates><LogicalDeviceState xsi:type=\"SwitchActuatorState\" LID=\"" + deviceId + "\" IsOn=\"" + bOn + "\" /></ActuatorStates></BaseRequest>";
         Logger.getLogger(SmartHomeSession.class.getName()).log(Level.FINE, "Switching: " + switchOnRequest);
-        sResponse = executeRequest(switchOnRequest, "/cmd");
+//        sResponse = 
+        executeRequest(switchOnRequest, "/cmd");
     }
     
     public void switchDimmerState(String deviceId, int currentValue) throws SmartHomeSessionExpiredException {
-        String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + getSessionId() + "\" BasedOnConfigVersion=\"" + currentConfigurationVersion + "\"><ActuatorStates><LogicalDeviceState xsi:type=\"SwitchActuatorState\" LID=\"" + deviceId + "\" DmLvl=\"" + currentValue + "\" /></ActuatorStates></BaseRequest>";
+        String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + getSessionId() + "\" BasedOnConfigVersion=\"" + currentConfigurationVersion + "\"><ActuatorStates><LogicalDeviceState xsi:type=\"DimmerActuatorState\" LID=\"" + deviceId + "\" DmLvl=\"" + currentValue + "\" /></ActuatorStates></BaseRequest>";
         Logger.getLogger(SmartHomeSession.class.getName()).log(Level.FINE, "Set dimmer state: " + switchOnRequest);
         String sResponse = executeRequest(switchOnRequest, "/cmd");
         Logger.getLogger(SmartHomeSession.class.getName()).log(Level.INFO, "Response: " + sResponse);
@@ -303,10 +305,11 @@ public class SmartHomeSession implements Serializable {
     
     public void roomTemperatureActuatorChangeState(String deviceId, String temperature) throws SmartHomeSessionExpiredException {
         String temperatureChangeRequest;
-        String sResponse = "";
+//        String sResponse = "";
         temperatureChangeRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + getSessionId() + "\" BasedOnConfigVersion=\"" + currentConfigurationVersion + "\"><ActuatorStates><LogicalDeviceState xsi:type=\"RoomTemperatureActuatorState\" LID=\"" + deviceId + "\" PtTmp=\"" + temperature + "\" OpnMd=\"" + "Auto" + "\" WRAc=\"False\" /></ActuatorStates></BaseRequest>";
-        Logger.getLogger(SmartHomeSession.class.getName()).log(Level.FINE, "ChangingTempeture: " + temperatureChangeRequest);
-        sResponse = executeRequest(temperatureChangeRequest, "/cmd");
+        Logger.getLogger(SmartHomeSession.class.getName()).log(Level.FINE, "ChangingTemperature: " + temperatureChangeRequest);
+//        sResponse = 
+        executeRequest(temperatureChangeRequest, "/cmd");
         
     }
     public void switchState(SwitchActuator switchActuator, boolean bOn) throws SmartHomeSessionExpiredException {
@@ -371,6 +374,8 @@ public class SmartHomeSession implements Serializable {
     }
 
     /**
+     * Gets the session id.
+     *
      * @return the sessionId
      */
     public String getSessionId() {
@@ -378,6 +383,8 @@ public class SmartHomeSession implements Serializable {
     }
 
     /**
+     * Gets the user name.
+     *
      * @return the userName
      */
     public String getUserName() {
@@ -385,6 +392,8 @@ public class SmartHomeSession implements Serializable {
     }
 
     /**
+     * Gets the host name.
+     *
      * @return the hostName
      */
     public String getHostName() {
@@ -392,17 +401,16 @@ public class SmartHomeSession implements Serializable {
     }
 
 	public void zustandsVariableChangeState(String deviceId, boolean bIsOn) throws SmartHomeSessionExpiredException {
-        String switchOnRequest;
-        String sResponse = "";
-        switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + getSessionId() + "\" BasedOnConfigVersion=\"" + currentConfigurationVersion + "\"><ActuatorStates><LogicalDeviceState xsi:type=\"GenericDeviceState\" LID=\"" + deviceId + "\"><Ppts><Ppt xsi:type=\"BooleanProperty\" Name=\"Value\" Value=\"" + bIsOn + "\" /></Ppts></LogicalDeviceState></ActuatorStates></BaseRequest>";
+//        String sResponse = "";
+        String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + getSessionId() + "\" BasedOnConfigVersion=\"" + currentConfigurationVersion + "\"><ActuatorStates><LogicalDeviceState xsi:type=\"GenericDeviceState\" LID=\"" + deviceId + "\"><Ppts><Ppt xsi:type=\"BooleanProperty\" Name=\"Value\" Value=\"" + bIsOn + "\" /></Ppts></LogicalDeviceState></ActuatorStates></BaseRequest>";
         Logger.getLogger(SmartHomeSession.class.getName()).log(Level.FINE, "Switching: " + switchOnRequest);
-        sResponse = executeRequest(switchOnRequest, "/cmd");		
+//        sResponse = 
+		executeRequest(switchOnRequest, "/cmd");		
 	}
 
 	public void zustandsVariableChangeState(GenericActuator genericActuator,
 			boolean newState) throws SmartHomeSessionExpiredException {
 		zustandsVariableChangeState(genericActuator.getDeviceId(), newState);
-		
 	}
 
 	public LogicalDevice getLogicalDeviceByRoomNameAndDeviceName(String roomName, String deviceName) {
@@ -439,29 +447,44 @@ public class SmartHomeSession implements Serializable {
 		return foundLogDev;
 	}
 	
-	public SMSActuator getSMSActuator() {
+	/**
+	 * Gets the sMS actuator.
+	 *
+	 * @return the sMS actuator
+	 */
+	public SmsActuator getSmsActuator() {
 		
 		Iterator it = baseActuators.entrySet().iterator();
 	    while (it.hasNext()) {
 	        Map.Entry pairs = (Map.Entry)it.next();
-	        if(baseActuators.get(pairs.getKey()) instanceof SMSActuator) {
-	        	return (SMSActuator) baseActuators.get(pairs.getKey());
+	        if(baseActuators.get(pairs.getKey()) instanceof SmsActuator) {
+	        	return (SmsActuator) baseActuators.get(pairs.getKey());
 	        }
 	    }
 	    return null;
 	}
 
-	public EMailActuator getEMailActuator() {
+	/**
+	 * Gets the e mail actuator.
+	 *
+	 * @return the e mail actuator
+	 */
+	public EmailActuator getEmailActuator() {
 		Iterator it = baseActuators.entrySet().iterator();
 	    while (it.hasNext()) {
 	        Map.Entry pairs = (Map.Entry)it.next();
-	        if(baseActuators.get(pairs.getKey()) instanceof EMailActuator) {
-	        	return (EMailActuator) baseActuators.get(pairs.getKey());
+	        if(baseActuators.get(pairs.getKey()) instanceof EmailActuator) {
+	        	return (EmailActuator) baseActuators.get(pairs.getKey());
 	        }
 	    }
 	    return null;
 	}
 
+	/**
+	 * Gets the day sensor.
+	 *
+	 * @return the day sensor
+	 */
 	public DaySensor getDaySensor() {
 		Iterator it = baseSensors.entrySet().iterator();
 	    while (it.hasNext()) {

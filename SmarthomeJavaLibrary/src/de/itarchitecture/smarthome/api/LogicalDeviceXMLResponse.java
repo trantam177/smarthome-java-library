@@ -6,7 +6,10 @@ package de.itarchitecture.smarthome.api;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,17 +24,14 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.itarchitecture.smarthome.api.entities.devices.AlarmActuator;
-import de.itarchitecture.smarthome.api.entities.devices.BaseActuator;
 import de.itarchitecture.smarthome.api.entities.devices.DaySensor;
 import de.itarchitecture.smarthome.api.entities.devices.DimmerActuator;
-import de.itarchitecture.smarthome.api.entities.devices.EMailActuator;
-import de.itarchitecture.smarthome.api.entities.devices.GenericActuator;
-import de.itarchitecture.smarthome.api.entities.devices.GenericSensor;
+import de.itarchitecture.smarthome.api.entities.devices.EmailActuator;
 import de.itarchitecture.smarthome.api.entities.devices.LogicalDevice;
 import de.itarchitecture.smarthome.api.entities.devices.RoomHumiditySensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureActuator;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureSensor;
-import de.itarchitecture.smarthome.api.entities.devices.SMSActuator;
+import de.itarchitecture.smarthome.api.entities.devices.SmsActuator;
 import de.itarchitecture.smarthome.api.entities.devices.SwitchActuator;
 import de.itarchitecture.smarthome.api.entities.devices.WindowDoorSensor;
 
@@ -102,6 +102,12 @@ public class LogicalDeviceXMLResponse extends XMLResponse {
 			roomTemperatureSensor.setLogicalDeviceType(LogicalDevice.Type_RoomTemperatureSensor);
 			roomTemperatureSensor.setTemperature(getDoubleValueFromAttribute(devEl, "Temperature"));
 			logicalDevice = roomTemperatureSensor;
+
+		} else if (LogicalDevice.Type_SmokeDetectionSensorState.equals(sType)) {
+			SwitchActuator switchActuator = (SwitchActuator) logicalDevice;
+			switchActuator.setLogicalDeviceType(LogicalDevice.Type_SmokeDetectorSensor);
+			switchActuator.setIsOn(getBooleanValueFromAttribute(devEl, "IsSmokeAlarm"));
+			logicalDevice = switchActuator;
 		} else if (LogicalDevice.Type_SwitchActuatorState.equals(sType)) {
 			SwitchActuator switchActuator = (SwitchActuator) logicalDevice;
 			switchActuator.setLogicalDeviceType(LogicalDevice.Type_SwitchActuator);
@@ -113,106 +119,87 @@ public class LogicalDeviceXMLResponse extends XMLResponse {
 			windowDoorSensor.setLogicalDeviceType(LogicalDevice.Type_WindowDoorSensor);
 			windowDoorSensor.setOpen(getBooleanValueFromElements(devEl, "IsOpen"));
 			logicalDevice = windowDoorSensor;
-		} else if (LogicalDevice.Type_AlarmActuator.equals(sType)) {
+		} else if (LogicalDevice.Type_AlarmActuatorState.equals(sType)) {
 			AlarmActuator alarmActuator = (AlarmActuator) logicalDevice;
 			alarmActuator.setLogicalDeviceType(LogicalDevice.Type_AlarmActuator);
-			alarmActuator.setOn(getBooleanValueFromElements(devEl, "IsOn"));
-			alarmActuator.setAlarmDuration(getIntValueFromElements(devEl, "AlarmDuration"));
+			alarmActuator.setOn(getBooleanValueFromAttribute(devEl, "IsOn"));
 			logicalDevice = alarmActuator;
-		} else if (LogicalDevice.Type_DimmerActuator.equals(sType)) {
+		} else if (LogicalDevice.Type_DimmerActuatorState.equals(sType)) {
 			DimmerActuator dimmerActuator = (DimmerActuator) logicalDevice;
-			dimmerActuator.setLogicalDeviceType(LogicalDevice.Type_SmokeDetectorSensor);
-			dimmerActuator.setMax(getIntValueFromElements(devEl, "TMxV"));
-			dimmerActuator.setMin(getIntValueFromElements(devEl, "TMnV"));
-			dimmerActuator.setDimLevel(getIntValueFromElements(devEl,"DmLvl"));
+			dimmerActuator.setLogicalDeviceType(LogicalDevice.Type_DimmerActuator);
+			dimmerActuator.setDimLevel(getIntValueFromAttribute(devEl,"DmLvl"));
 			logicalDevice = dimmerActuator;
-			
-		} else if (LogicalDevice.Type_GenericActuator.equals(sType)) {
-				NodeList nodes = devEl.getElementsByTagName("Ppt");
-				if (nodes.getLength()!=1) {
-					// Puffern
-					HashMap<String,String> cache = new HashMap<String,String>();
-					for (int i=0; i<nodes.getLength();i++) {
-						String name = getTextValueFromAttribute((Element)nodes.item(i), "Name");
-						String value = getTextValueFromAttribute((Element)nodes.item(i), "Value");
-						cache.put(name,value);
-					}
-					// Auswerten und Objekte anlegen
-					if (cache.containsKey("EmailPeriod")) {
-						// E-Mail Actuator
-						EMailActuator emailActuator = new EMailActuator();
-						emailActuator.setLogicalDeviceType(LogicalDevice.Type_EMailActuator);
-						emailActuator.setEmailMaxPeriod(cache.get("EmailMaxPeriod"));
-						emailActuator.setEmailPeriod(cache.get("EmailPeriod"));
-						emailActuator.setEmailMessage("EmailMessage");
-						// TODO kohlm: receivers
-						logicalDevice = emailActuator;
-					}
-					if (cache.containsKey("SMSPeriod")) {
-						// SMSActuator
-						SMSActuator smsActuator = new SMSActuator();
-						smsActuator.setLogicalDeviceType(LogicalDevice.Type_SMSActuator);
-						smsActuator.setSMSMaxPeriod(cache.get("SMSMaxPeriod"));
-						smsActuator.setSMSPeriod(cache.get("SMSPeriod"));
-						smsActuator.setSMSMessage("SMSMessage");
-						// TODO kohlm: receivers
-						logicalDevice = smsActuator;
-					}
-					cache.clear();
-					return logicalDevice;
-				}
-				GenericActuator genericActuator = new GenericActuator();
-				genericActuator.setLogicalDeviceType(LogicalDevice.Type_GenericActuator);
-				logicalDevice = genericActuator;
-			} else if (LogicalDevice.Type_GenericSensor.equals(sType)) {
-				NodeList nodes = devEl.getElementsByTagName("Ppt");
-				if (nodes.getLength()!=1) {
-					// Puffern
-					HashMap<String,String> cache = new HashMap<String,String>();
-					for (int i=0; i<nodes.getLength();i++) {
-						String name = getTextValueFromAttribute((Element)nodes.item(i), "Name");
-						String value = getTextValueFromAttribute((Element)nodes.item(i), "Value");
-						cache.put(name,value);
-					}
-					// Auswerten und Objekte anlegen
-					if (cache.containsKey("Latitude")) {
-						DaySensor dayActuator = new DaySensor();
-						dayActuator.setLatitude(cache.get("Latitude"));
-						dayActuator.setLongitude(cache.get("Longitude"));
-						logicalDevice = dayActuator;
-					}
-					cache.clear();
-					return logicalDevice;
-				}
-				GenericSensor genericSensor = new GenericSensor();
-				genericSensor.setLogicalDeviceType(LogicalDevice.Type_GenericSensor);
-				logicalDevice = genericSensor;
-			} else {
-				Logger.getLogger(LogicalDeviceXMLResponse.class.getName()).log(Level.FINEST,"-1-----------new/unknown sensor/actuator state: "+sType);
+		} else if (LogicalDevice.Type_GenericActuatorState.equals(sType)) {
+			NodeList nodes = devEl.getElementsByTagName("Ppt");
+			// Puffern
+			HashMap<String,String> cache = new HashMap<String,String>();
+			for (int i=0; i<nodes.getLength();i++) {
+				String name = getTextValueFromAttribute((Element)nodes.item(i), "Name");
+				String value = getTextValueFromAttribute((Element)nodes.item(i), "Value");
+				cache.put(name,value);
 			}
-
-			return logicalDevice;
+			// Auswerten und Objekte anlegen
+			if (cache.containsKey("EmailNumberAvailable")) {
+				// E-Mail Actuator
+				EmailActuator emailActuator = new EmailActuator();
+				emailActuator.setLogicalDeviceType(LogicalDevice.Type_EmailActuator);
+				emailActuator.setEmailAvailable(Integer.valueOf(cache.get("EmailNumberAvailable")));
+				logicalDevice = emailActuator;
+				cache.clear();
+				return logicalDevice;
+			}
+			if (cache.containsKey("SMSNumberAvailable")) {
+				// SMSActuator
+				SmsActuator smsActuator = new SmsActuator();
+				smsActuator.setLogicalDeviceType(LogicalDevice.Type_SmsActuator);
+				smsActuator.setSmsAvailable(Integer.valueOf(cache.get("SMSNumberAvailable")));
+				logicalDevice = smsActuator;
+				cache.clear();
+				return logicalDevice;
+			}
+			if (cache.containsKey("NextSunrise")) {
+				// DaySensor
+				DaySensor daySensor = new DaySensor();
+				daySensor.setType(LogicalDevice.Type_DaySensor);
+			    DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSZ", Locale.ENGLISH);
+			    try {
+					daySensor.setNextSunrise(df.parse(cache.get("NextSunrise").replace("000+", "GMT+")));
+					daySensor.setNextSunset(df.parse(cache.get("NextSunset").replace("000+", "GMT+")));
+					daySensor.setNextTimeEvent(df.parse(cache.get("NextTimeEvent").replace("000+", "GMT+")));
+			    } catch (Exception ex) {
+			    	Logger.getLogger(LogicalDeviceXMLResponse.class.getName()).log(Level.SEVERE,"error parsing date for DaySensor");
+			    }
+				logicalDevice = daySensor;
+				cache.clear();
+				return logicalDevice;
+			}
+			Logger.getLogger(LogicalDeviceXMLResponse.class.getName()).log(Level.FINE,"ignoring unknown GenericDeviceState");
+		} else {
+			Logger.getLogger(LogicalDeviceXMLResponse.class.getName()).log(Level.INFO,"-1-----------new/unknown sensor/actuator state: "+sType);
 		}
 
-		/**
-		 * @return the currentConfigurationVersion
-		 */
-		public String getCurrentConfigurationVersion() {
-			return currentConfigurationVersion;
-		}
-
-		/**
-		 * @return the correspondingRequestId
-		 */
-		public String getCorrespondingRequestId() {
-			return correspondingRequestId;
-		}
-
-		/**
-		 * @return the responseStatus
-		 */
-		public String getResponseStatus() {
-			return responseStatus;
-		}
-
+		return logicalDevice;
 	}
+
+	/**
+	 * @return the currentConfigurationVersion
+	 */
+	public String getCurrentConfigurationVersion() {
+		return currentConfigurationVersion;
+	}
+
+	/**
+	 * @return the correspondingRequestId
+	 */
+	public String getCorrespondingRequestId() {
+		return correspondingRequestId;
+	}
+
+	/**
+	 * @return the responseStatus
+	 */
+	public String getResponseStatus() {
+		return responseStatus;
+	}
+
+}
