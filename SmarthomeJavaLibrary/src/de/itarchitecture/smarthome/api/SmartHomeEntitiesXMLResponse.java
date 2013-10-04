@@ -27,6 +27,8 @@ import de.itarchitecture.smarthome.api.entities.devices.EmailActuator;
 import de.itarchitecture.smarthome.api.entities.devices.GenericActuator;
 import de.itarchitecture.smarthome.api.entities.devices.GenericSensor;
 import de.itarchitecture.smarthome.api.entities.devices.LogicalDevice;
+import de.itarchitecture.smarthome.api.entities.devices.LuminanceSensor;
+import de.itarchitecture.smarthome.api.entities.devices.MotionDetectionSensor;
 import de.itarchitecture.smarthome.api.entities.devices.PushButtonSensor;
 import de.itarchitecture.smarthome.api.entities.devices.RollerShutterActuator;
 import de.itarchitecture.smarthome.api.entities.devices.RoomHumiditySensor;
@@ -214,8 +216,19 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 					"LCID"));
 			windowDoorSensors.put(windowDoorSensor.getDeviceId(), windowDoorSensor);
 			logicalDevice = windowDoorSensor;
+		} else if (LogicalDevice.Type_MotionDetectionSensor.equals(sType)) {
+			MotionDetectionSensor motionDetectionSensor = new MotionDetectionSensor();
+			motionDetectionSensor.setLogicalDeviceType(LogicalDevice.Type_MotionDetectionSensor);
+			baseSensors.put(motionDetectionSensor.getDeviceId(), (BaseSensor) motionDetectionSensor);
+			logicalDevice = motionDetectionSensor;
+		} else if (LogicalDevice.Type_LuminanceSensor.equals(sType)) {
+			LuminanceSensor luminaceSensor =  new LuminanceSensor();
+			luminaceSensor.setLogicalDeviceType(LogicalDevice.Type_LuminanceSensor);
+			baseSensors.put(luminaceSensor.getDeviceId(), (BaseSensor) luminaceSensor);
+			logicalDevice = luminaceSensor;
 		} else if (LogicalDevice.Type_Router.equals(sType)) {
 			Router router = new Router();
+			router.setLogicalDeviceType(LogicalDevice.Type_Router);
 			router.setLogicalDeviceId(getTextValueFromElements(devEl,
 					"Id"));
 			router.setDeviceName(getTextValueFromAttribute(devEl,
@@ -225,9 +238,9 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 			router.setBaseDeviceId(getTextValueFromElements(devEl,
 			"BDId"));
 
-			getRouters().put(router.getDeviceId(), router);
+			routers.put(router.getDeviceId(), router);
 			logicalDevice = router;
-		} else if (LogicalDevice.Type_RoomTemperatureActuator.equals(sType)) {
+		}  else if (LogicalDevice.Type_RoomTemperatureActuator.equals(sType)) {
 			RoomTemperatureActuator roomTemperatureActuator = new RoomTemperatureActuator();
 			/*
 			 * roomTemperatureActuator.setOperationMode(getTextValueFromElements(
@@ -377,8 +390,8 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 			rollerShutterActuator.setLocationId(getTextValueFromAttribute(devEl,"LCID"));
 			rollerShutterActuator.setBaseDeviceId(getTextValueFromElements(devEl,"BDId"));
 			rollerShutterActuator.setActuatorClass(getTextValueFromElements(devEl,"ActCls"));
-			rollerShutterActuator.setOnLvl(getTextValueFromElements(devEl,"OnLvl"));
-			rollerShutterActuator.setOffLvl(getTextValueFromElements(devEl,"OffLvl"));
+			rollerShutterActuator.setOnLvl(getIntValueFromElements(devEl,"OnLvl"));
+			rollerShutterActuator.setOffLvl(getIntValueFromElements(devEl,"OffLvl"));
 			rollerShutterActuator.setShDT(getTextValueFromElements(devEl,"ShDT"));
 			rollerShutterActuator.setSCBh(getTextValueFromElements(devEl,"SCBh"));
 			rollerShutterActuator.setTmFU(getTextValueFromElements(devEl,"TmFU"));

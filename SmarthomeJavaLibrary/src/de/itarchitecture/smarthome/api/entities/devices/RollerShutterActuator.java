@@ -7,26 +7,15 @@ package de.itarchitecture.smarthome.api.entities.devices;
  */
 public class RollerShutterActuator extends BaseActuator {
 
-    private String OnLvl;
-    private String OffLvl;
+    private int OnLvl;
+    private int OffLvl;
     private String ShDT;
     private String SCBh;
     private String TmFU;
     private String TmFD;
     private boolean IsCalibrating;
+	private int shutterLevel;
 	
-    public String getOnLvl() {
-		return OnLvl;
-	}
-	public void setOnLvl(String onLvl) {
-		OnLvl = onLvl;
-	}
-	public String getOffLvl() {
-		return OffLvl;
-	}
-	public void setOffLvl(String offLvl) {
-		OffLvl = offLvl;
-	}
 	public String getShDT() {
 		return ShDT;
 	}
@@ -56,6 +45,24 @@ public class RollerShutterActuator extends BaseActuator {
 	}
 	public void setIsCalibrating(boolean isCalibrating) {
 		IsCalibrating = isCalibrating;
+	}
+	public int getOnLvl() {
+		return OnLvl;
+	}
+	public void setOnLvl(int onLvl) {
+		OnLvl = onLvl;
+	}
+	public int getOffLvl() {
+		return OffLvl;
+	}
+	public void setOffLvl(int offLvl) {
+		OffLvl = offLvl;
+	}
+	public int getShutterLevel() {
+		return shutterLevel;
+	}
+	public void setShutterLevel(int shutterLevel) {
+		this.shutterLevel = shutterLevel;
 	}
 	
 }

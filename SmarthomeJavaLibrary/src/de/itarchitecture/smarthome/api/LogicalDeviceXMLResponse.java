@@ -29,7 +29,7 @@ import de.itarchitecture.smarthome.api.entities.devices.DimmerActuator;
 import de.itarchitecture.smarthome.api.entities.devices.EmailActuator;
 import de.itarchitecture.smarthome.api.entities.devices.LogicalDevice;
 import de.itarchitecture.smarthome.api.entities.devices.LuminanceSensor;
-import de.itarchitecture.smarthome.api.entities.devices.MotionDetectionSensor;
+import de.itarchitecture.smarthome.api.entities.devices.RollerShutterActuator;
 import de.itarchitecture.smarthome.api.entities.devices.RoomHumiditySensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureActuator;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureSensor;
@@ -92,9 +92,14 @@ public class LogicalDeviceXMLResponse extends XMLResponse {
 			roomHumiditySensor.setLogicalDeviceType(LogicalDevice.Type_RoomHumiditySensor);
 			roomHumiditySensor.setHumidity(getDoubleValueFromAttribute(devEl,"Humidity"));
 			logicalDevice = roomHumiditySensor;
-		} else if (LogicalDevice.Type_MotionDetectionSensor.equals(sType)) {
-			MotionDetectionSensor motionDetectionSensor = (MotionDetectionSensor) logicalDevice;
-			logicalDevice = motionDetectionSensor;
+		} else if (LogicalDevice.Type_LuminanceSensorState.equals(sType)) {
+			LuminanceSensor luminanceSensor = (LuminanceSensor) logicalDevice;
+			luminanceSensor.setLuminance(getIntValueFromAttribute(devEl,"Luminance"));
+			logicalDevice = luminanceSensor;
+		} else if (LogicalDevice.Type_RollerShutterActuatorState.equals(sType)) {
+			RollerShutterActuator rollerShutterActuator = (RollerShutterActuator) logicalDevice;
+			rollerShutterActuator.setShutterLevel(getIntValueFromAttribute(devEl,"ShutterLevel"));
+			logicalDevice = rollerShutterActuator;
 		} else if (LogicalDevice.Type_LuminanceSensor.equals(sType)) {
 			LuminanceSensor luminaceSensor = (LuminanceSensor) logicalDevice;
 			luminaceSensor.setLogicalDeviceType(LogicalDevice.Type_LuminanceSensor);

@@ -496,7 +496,7 @@ public class SmartHomeSession implements Serializable {
 	 * @throws SmartHomeSessionExpiredException the smart home session expired exception
 	 */
 	public void switchRollerShutter(String deviceId, int currentValue) throws SmartHomeSessionExpiredException {
-		String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + getSessionId() + "\" BasedOnConfigVersion=\"" + currentConfigurationVersion + "\"><ActuatorStates><LogicalDeviceState xsi:type=\"RollerShutterActuator\" LID=\"" + deviceId + "\" OnLvl=\"" + currentValue + "\" /></ActuatorStates></BaseRequest>";
+		String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + getSessionId() + "\" BasedOnConfigVersion=\"" + currentConfigurationVersion + "\"><ActuatorStates><LogicalDeviceState xsi:type=\"RollerShutterActuatorState\" LID=\"" + deviceId + "\" ShutterLevel=\"" + currentValue + "\" /></ActuatorStates></BaseRequest>";
 		Logger.getLogger(SmartHomeSession.class.getName()).log(Level.FINE, "Set roller shutter: " + switchOnRequest);
 		String sResponse = executeRequest(switchOnRequest, "/cmd");
 		Logger.getLogger(SmartHomeSession.class.getName()).log(Level.INFO, "Response: " + sResponse);
