@@ -149,7 +149,7 @@ public class SmartHomeSession implements Serializable {
 
     }
 
-    public void refreshLogicalDeviceState() throws SmartHomeSessionExpiredException {
+    public String refreshLogicalDeviceState() throws SmartHomeSessionExpiredException {
         String getLogicalDevicesRequest;
         String sResponse = "";
         getLogicalDevicesRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"GetAllLogicalDeviceStatesRequest\" Version=\"1.60\" RequestId=\"" + requestId + "\" SessionId=\"" + this.getSessionId() + "\" BasedOnConfigVersion=\"" + currentConfigurationVersion + "\" />";
@@ -166,6 +166,7 @@ public class SmartHomeSession implements Serializable {
         logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), windowDoorSensors);
         logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), baseActuators);
         logDevXmlRes.refreshLogicalDevices(IOUtils.toInputStream(sResponse), baseSensors);
+        return sResponse;
     }
     
     public void refreshConfigurationFromInputStream(InputStream is){
