@@ -28,9 +28,11 @@ import de.itarchitecture.smarthome.api.entities.devices.GenericActuator;
 import de.itarchitecture.smarthome.api.entities.devices.GenericSensor;
 import de.itarchitecture.smarthome.api.entities.devices.LogicalDevice;
 import de.itarchitecture.smarthome.api.entities.devices.PushButtonSensor;
+import de.itarchitecture.smarthome.api.entities.devices.RollerShutterActuator;
 import de.itarchitecture.smarthome.api.entities.devices.RoomHumiditySensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureActuator;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureSensor;
+import de.itarchitecture.smarthome.api.entities.devices.Router;
 import de.itarchitecture.smarthome.api.entities.devices.SmokeDetectorSensor;
 import de.itarchitecture.smarthome.api.entities.devices.SmsActuator;
 import de.itarchitecture.smarthome.api.entities.devices.SwitchActuator;
@@ -54,8 +56,10 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 	private String responseStatus = "";
 	private ConcurrentHashMap<String, SmartHomeLocation> locations = null;
 	private ConcurrentHashMap<String, PushButtonSensor> pushButtonSensors = null;
+	private ConcurrentHashMap<String, Router> routers = null;
 	private ConcurrentHashMap<String, SwitchActuator> switchActuators = null;
 	private ConcurrentHashMap<String, DimmerActuator> dimmerActuators = null;
+	private ConcurrentHashMap<String, RollerShutterActuator> rollerShutterActuators = null;
 	private ConcurrentHashMap<String, AlarmActuator> alarmActuators = null;
 	private ConcurrentHashMap<String, BaseActuator> baseActuators = null;
 	private ConcurrentHashMap<String, BaseSensor> baseSensors = null;
@@ -96,8 +100,10 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 			NodeList nlLogicalDevices = docEle
 					.getElementsByTagName("LD");
 			pushButtonSensors = new ConcurrentHashMap<String, PushButtonSensor>();
+			routers= new ConcurrentHashMap<String, Router>();
 			switchActuators = new ConcurrentHashMap<String, SwitchActuator>();
 			dimmerActuators = new ConcurrentHashMap<String, DimmerActuator>();
+			rollerShutterActuators = new ConcurrentHashMap<String, RollerShutterActuator>();
 			alarmActuators = new ConcurrentHashMap<String, AlarmActuator>();
 			baseActuators = new ConcurrentHashMap<String, BaseActuator>();
 			baseSensors = new ConcurrentHashMap<String, BaseSensor>();
@@ -208,6 +214,19 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 					"LCID"));
 			windowDoorSensors.put(windowDoorSensor.getDeviceId(), windowDoorSensor);
 			logicalDevice = windowDoorSensor;
+		} else if (LogicalDevice.Type_Router.equals(sType)) {
+			Router router = new Router();
+			router.setLogicalDeviceId(getTextValueFromElements(devEl,
+					"Id"));
+			router.setDeviceName(getTextValueFromAttribute(devEl,
+					"Name"));
+			router.setLocationId(getTextValueFromAttribute(devEl,
+					"LCID"));
+			router.setBaseDeviceId(getTextValueFromElements(devEl,
+			"BDId"));
+
+			getRouters().put(router.getDeviceId(), router);
+			logicalDevice = router;
 		} else if (LogicalDevice.Type_RoomTemperatureActuator.equals(sType)) {
 			RoomTemperatureActuator roomTemperatureActuator = new RoomTemperatureActuator();
 			/*
@@ -350,6 +369,23 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 			
 			pushButtonSensors.put(pushButtonSensor.getDeviceId(), pushButtonSensor);
 			logicalDevice = pushButtonSensor;
+		} else if (LogicalDevice.Type_RollerShutterActuator.equals(sType)) {
+			RollerShutterActuator rollerShutterActuator = new RollerShutterActuator();
+			rollerShutterActuator.setLogicalDeviceType(LogicalDevice.Type_RollerShutterActuator);
+			rollerShutterActuator.setLogicalDeviceId(getTextValueFromElements(devEl,"Id"));
+			rollerShutterActuator.setDeviceName(getTextValueFromAttribute(devEl, "Name"));
+			rollerShutterActuator.setLocationId(getTextValueFromAttribute(devEl,"LCID"));
+			rollerShutterActuator.setBaseDeviceId(getTextValueFromElements(devEl,"BDId"));
+			rollerShutterActuator.setActuatorClass(getTextValueFromElements(devEl,"ActCls"));
+			rollerShutterActuator.setOnLvl(getTextValueFromElements(devEl,"OnLvl"));
+			rollerShutterActuator.setOffLvl(getTextValueFromElements(devEl,"OffLvl"));
+			rollerShutterActuator.setShDT(getTextValueFromElements(devEl,"ShDT"));
+			rollerShutterActuator.setSCBh(getTextValueFromElements(devEl,"SCBh"));
+			rollerShutterActuator.setTmFU(getTextValueFromElements(devEl,"TmFU"));
+			rollerShutterActuator.setTmFD(getTextValueFromElements(devEl,"TmFD"));
+			rollerShutterActuator.setIsCalibrating(getBooleanValueFromElements(devEl,"IsCalibrating"));
+			rollerShutterActuators.put(rollerShutterActuator.getDeviceId(), rollerShutterActuator);
+			logicalDevice = rollerShutterActuator;
 		} else if (LogicalDevice.Type_SwitchActuator.equals(sType)) {
 			SwitchActuator switchActuator = new SwitchActuator();
 			switchActuator
@@ -557,5 +593,13 @@ public class SmartHomeEntitiesXMLResponse extends XMLResponse {
 	public ConcurrentHashMap<String, ? extends LogicalDevice> getWindowDoorSensors() {
 		return windowDoorSensors;
 	}
-	
+
+	public ConcurrentHashMap<String, Router> getRouters() {
+		return routers;
+	}
+
+	public ConcurrentHashMap<String, RollerShutterActuator> getRollerShutterActuators() {
+		return rollerShutterActuators;
+	}
+
 }

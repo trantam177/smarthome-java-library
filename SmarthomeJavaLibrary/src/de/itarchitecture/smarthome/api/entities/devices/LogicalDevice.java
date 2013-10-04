@@ -18,8 +18,12 @@ public class LogicalDevice extends SmartHomeDevice{
     public static final String Type_RoomTemperatureActuatorState = "RoomTemperatureActuatorState";
     public static final String Type_RoomHumiditySensorState = "RoomHumiditySensorState";
     public static final String Type_GenericSensor = "GenericSensor";
-    	public static final String Type_DaySensor = "DaySensor";
+   	public static final String Type_DaySensor = "DaySensor";
+   	public static final String Type_LuminanceSensor = "LuminanceSensor";
+   	public static final String Type_MotionDetectionSensor = "MotionDetectionSensor";
     public static final String Type_RoomTemperatureSensorState = "RoomTemperatureSensorState";
+    public static final String Type_RollerShutterActuator = "RollerShutterActuator";
+    public static final String Type_Router = "Router";
     public static final String Type_SwitchActuator = "SwitchActuator";
     public static final String Type_PushButtonSensor = "PushButtonSensor";
     public static final String Type_DimmerActuator = "DimmerActuator";

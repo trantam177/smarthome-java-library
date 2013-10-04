@@ -28,6 +28,8 @@ import de.itarchitecture.smarthome.api.entities.devices.DaySensor;
 import de.itarchitecture.smarthome.api.entities.devices.DimmerActuator;
 import de.itarchitecture.smarthome.api.entities.devices.EmailActuator;
 import de.itarchitecture.smarthome.api.entities.devices.LogicalDevice;
+import de.itarchitecture.smarthome.api.entities.devices.LuminanceSensor;
+import de.itarchitecture.smarthome.api.entities.devices.MotionDetectionSensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomHumiditySensor;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureActuator;
 import de.itarchitecture.smarthome.api.entities.devices.RoomTemperatureSensor;
@@ -90,6 +92,13 @@ public class LogicalDeviceXMLResponse extends XMLResponse {
 			roomHumiditySensor.setLogicalDeviceType(LogicalDevice.Type_RoomHumiditySensor);
 			roomHumiditySensor.setHumidity(getDoubleValueFromAttribute(devEl,"Humidity"));
 			logicalDevice = roomHumiditySensor;
+		} else if (LogicalDevice.Type_MotionDetectionSensor.equals(sType)) {
+			MotionDetectionSensor motionDetectionSensor = (MotionDetectionSensor) logicalDevice;
+			logicalDevice = motionDetectionSensor;
+		} else if (LogicalDevice.Type_LuminanceSensor.equals(sType)) {
+			LuminanceSensor luminaceSensor = (LuminanceSensor) logicalDevice;
+			luminaceSensor.setLogicalDeviceType(LogicalDevice.Type_LuminanceSensor);
+			logicalDevice = luminaceSensor;
 		} else if (LogicalDevice.Type_RoomTemperatureActuatorState.equals(sType)) {
 			RoomTemperatureActuator roomTemperatureActuator = (RoomTemperatureActuator) logicalDevice;
 			roomTemperatureActuator.setLogicalDeviceType(LogicalDevice.Type_RoomTemperatureActuator);
