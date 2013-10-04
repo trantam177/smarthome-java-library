@@ -33,7 +33,7 @@ public class ConfigDumper {
 			System.out.println("Configuration received");
 			System.out.println("Writing to file...");
 			File file = new File("config.xml");
-			FileWriter writer = new FileWriter(file ,true);
+			FileWriter writer = new FileWriter(file , false);
 			writer.write(configuration);
 			writer.flush();
 			writer.close();
@@ -43,7 +43,7 @@ public class ConfigDumper {
 			System.out.println("Device states received");
 			System.out.println("Writing to file...");
 			file = new File("states.xml");
-			writer = new FileWriter(file ,true);
+			writer = new FileWriter(file ,false);
 			writer.write(deviceState);
 			writer.flush();
 			writer.close();
