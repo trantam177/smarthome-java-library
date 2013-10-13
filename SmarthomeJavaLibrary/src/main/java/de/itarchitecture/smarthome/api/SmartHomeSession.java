@@ -218,7 +218,7 @@ public class SmartHomeSession implements Serializable {
 		requestId = generateRequestId();
 		passWordEncrypted = generateHashFromPassword(passWord);
 		String sResponse = "";
-		String loginRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"LoginRequest\" Version=\"1.60\" RequestId=\""
+		String loginRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"LoginRequest\" Version=\"" + SmartHomeBase.FIRMWARE_VERSION + "\" RequestId=\""
 				+ requestId
 				+ "\" UserName=\""
 				+ getUserName()
@@ -264,7 +264,7 @@ public class SmartHomeSession implements Serializable {
 	 */
 	public void destroy() {
 		String logoutrequest = "";
-		logoutrequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"LogoutRequest\" Version=\"1.60\" RequestId=\""
+		logoutrequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"LogoutRequest\" Version=\"" + SmartHomeBase.FIRMWARE_VERSION + "\" RequestId=\""
 				+ requestId + "\" SessionId=\"" + getSessionId() + "\" />";
 		try {
 			// String sResponse =
@@ -287,7 +287,7 @@ public class SmartHomeSession implements Serializable {
 			throws SmartHomeSessionExpiredException {
 		String getLogicalDevicesRequest;
 		String sResponse = "";
-		getLogicalDevicesRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"GetAllLogicalDeviceStatesRequest\" Version=\"1.60\" RequestId=\""
+		getLogicalDevicesRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"GetAllLogicalDeviceStatesRequest\" Version=\"" + SmartHomeBase.FIRMWARE_VERSION + "\" RequestId=\""
 				+ requestId
 				+ "\" SessionId=\""
 				+ this.getSessionId()
@@ -445,7 +445,7 @@ public class SmartHomeSession implements Serializable {
 
 		String getConfigurationRequest;
 		String sResponse = "";
-		getConfigurationRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"GetEntitiesRequest\" Version=\"1.60\" RequestId=\""
+		getConfigurationRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"GetEntitiesRequest\" Version=\"" + SmartHomeBase.FIRMWARE_VERSION + "\" RequestId=\""
 				+ requestId
 				+ "\" SessionId=\""
 				+ sessionId
@@ -474,7 +474,7 @@ public class SmartHomeSession implements Serializable {
 			throws SmartHomeSessionExpiredException {
 		String getPhysicalDevicesRequest;
 		String sResponse = "";
-		getPhysicalDevicesRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"GetAllPhysicalDeviceStatesRequest\" Version=\"1.60\" RequestId=\""
+		getPhysicalDevicesRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"GetAllPhysicalDeviceStatesRequest\" Version=\"" + SmartHomeBase.FIRMWARE_VERSION + "\" RequestId=\""
 				+ requestId + "\" SessionId=\"" + getSessionId() + "\" />";
 		sResponse = executeRequest(getPhysicalDevicesRequest, "/cmd");
 		PhysicalDeviceXMLResponse physDevXmlRes = new PhysicalDeviceXMLResponse(
@@ -548,7 +548,7 @@ public class SmartHomeSession implements Serializable {
 			throws SmartHomeSessionExpiredException {
 		String switchOnRequest;
 		// String sResponse = "";
-		switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\""
+		switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"" + SmartHomeBase.FIRMWARE_VERSION + "\" RequestId=\""
 				+ requestId
 				+ "\" SessionId=\""
 				+ getSessionId()
@@ -577,7 +577,7 @@ public class SmartHomeSession implements Serializable {
 	 */
 	public void switchDimmerState(String deviceId, int currentValue)
 			throws SmartHomeSessionExpiredException {
-		String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\""
+		String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"" + SmartHomeBase.FIRMWARE_VERSION + "\" RequestId=\""
 				+ requestId
 				+ "\" SessionId=\""
 				+ getSessionId()
@@ -607,7 +607,7 @@ public class SmartHomeSession implements Serializable {
 	 */
 	public void switchRollerShutter(String deviceId, int currentValue)
 			throws SmartHomeSessionExpiredException {
-		String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\""
+		String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"" + SmartHomeBase.FIRMWARE_VERSION + "\" RequestId=\""
 				+ requestId
 				+ "\" SessionId=\""
 				+ getSessionId()
@@ -639,7 +639,7 @@ public class SmartHomeSession implements Serializable {
 			String temperature) throws SmartHomeSessionExpiredException {
 		String temperatureChangeRequest;
 		// String sResponse = "";
-		temperatureChangeRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\""
+		temperatureChangeRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"" + SmartHomeBase.FIRMWARE_VERSION + "\" RequestId=\""
 				+ requestId
 				+ "\" SessionId=\""
 				+ getSessionId()
@@ -791,10 +791,11 @@ public class SmartHomeSession implements Serializable {
 	 * @throws SmartHomeSessionExpiredException
 	 *             the smart home session expired exception
 	 */
+
 	public void zustandsVariableChangeState(String deviceId, boolean bIsOn)
 			throws SmartHomeSessionExpiredException {
 		// String sResponse = "";
-		String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"1.60\" RequestId=\""
+		String switchOnRequest = "<BaseRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:type=\"SetActuatorStatesRequest\" Version=\"" + SmartHomeBase.FIRMWARE_VERSION + "\" RequestId=\""
 				+ requestId
 				+ "\" SessionId=\""
 				+ getSessionId()
